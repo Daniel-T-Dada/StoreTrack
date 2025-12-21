@@ -72,7 +72,7 @@ const AppSidebar = () => {
                         <SidebarMenuButton asChild size="lg" tooltip="StockTrack">
                             <Link href={dashboardHref}>
 
-                                <span className="font-bold text-2xl">StockTrack</span>
+                                <span className="font-bold text-2xl">StoreTrack</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
