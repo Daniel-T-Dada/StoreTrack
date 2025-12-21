@@ -10,6 +10,7 @@ import { Table, TableHeader, TableRow, TableCell, TableBody, TableHead } from "@
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import Link from "next/link"
+import { formatNaira } from "@/lib/utils"
 
 export default function ProductsPage() {
     const { data: me } = useMe()
@@ -71,7 +72,7 @@ export default function ProductsPage() {
                                     data.map((p) => (
                                         <TableRow key={p._id}>
                                             <TableCell className="font-medium">{p.name}</TableCell>
-                                            <TableCell className="text-right">{p.price}</TableCell>
+                                            <TableCell className="text-right">{formatNaira(p.price)}</TableCell>
                                             <TableCell className="text-right">{p.quantity}</TableCell>
                                             {canManage ? (
                                                 <TableCell className="text-right">

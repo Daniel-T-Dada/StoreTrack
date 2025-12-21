@@ -12,12 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react"
-
-const formatNaira = (value: unknown) => {
-  const numberValue = typeof value === "number" ? value : Number(value)
-  if (!Number.isFinite(numberValue)) return "0"
-  return numberValue.toLocaleString(undefined, { maximumFractionDigits: 2 })
-}
+import { formatNaira } from "@/lib/utils"
 
 export default function SalesHistoryPage() {
   const { data: me } = useMe()
@@ -128,7 +123,7 @@ export default function SalesHistoryPage() {
                         </Link>
                       </TableCell>
                       <TableCell className="text-right">{tx.totalQuantity}</TableCell>
-                      <TableCell className="text-right">₦{formatNaira(tx.total)}</TableCell>
+                      <TableCell className="text-right">{formatNaira(tx.total)}</TableCell>
                     </TableRow>
                   ))
                 )}
@@ -139,7 +134,7 @@ export default function SalesHistoryPage() {
                       Totals
                     </TableCell>
                     <TableCell className="text-right font-medium">{totalItems}</TableCell>
-                    <TableCell className="text-right font-medium">₦{formatNaira(totalAmount)}</TableCell>
+                    <TableCell className="text-right font-medium">{formatNaira(totalAmount)}</TableCell>
                   </TableRow>
                 ) : null}
               </TableBody>

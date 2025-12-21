@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useMemo, useState } from "react"
 import type { AxiosError } from "axios"
+import { useRouter } from "next/navigation"
 import {
     Select,
     SelectContent,
@@ -23,20 +24,16 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { api } from "@/lib/api"
+import { formatNaira } from "@/lib/utils"
 
 type CartItem = {
     product: ProductLookupResult
     quantity: number
 }
 
-const formatNaira = (value: unknown) => {
-    const numberValue = typeof value === "number" ? value : Number(value)
-    if (!Number.isFinite(numberValue)) return "0"
-    return numberValue.toLocaleString(undefined, { maximumFractionDigits: 2 })
-}
-
 export default function SalesPage() {
     const checkout = useCheckout()
+    const router = useRouter()
     const { data: me, isLoading: meLoading } = useMe() // 🔑 get current user
 
     const isStaffUser = me?.userType === "staff" || me?.role === "staff"
@@ -70,6 +67,14 @@ export default function SalesPage() {
 
         const axiosErr = err as AxiosError<ErrorPayload>
         const data = axiosErr.response?.data
+
+        // Store scoping: backend returns 404 Product not found in this store
+        if (axiosErr.response?.status === 404) {
+            const msg = typeof data?.message === "string" ? data.message : ""
+            if (msg.toLowerCase().includes("product not found")) {
+                return "Product not found in this store. Refresh products and try again."
+            }
+        }
 
         // express-validator format: { errors: [{ msg: "..." }, ...] }
         const validatorMsg = Array.isArray(data?.errors) ? data.errors?.[0]?.msg : null
@@ -286,7 +291,7 @@ export default function SalesPage() {
                                                             ) : null}
                                                         </TableCell>
                                                         <TableCell className="text-right">{p.quantity}</TableCell>
-                                                        <TableCell className="text-right">₦{formatNaira(p.price)}</TableCell>
+                                                        <TableCell className="text-right">{formatNaira(p.price)}</TableCell>
                                                         <TableCell className="text-right">
                                                             <Button
                                                                 size="sm"
@@ -362,8 +367,8 @@ export default function SalesPage() {
                                                 onChange={(e) => setItemQuantity(product._id, Number(e.target.value) || 1)}
                                             />
                                         </TableCell>
-                                        <TableCell className="text-right">₦{formatNaira(product.price)}</TableCell>
-                                        <TableCell className="text-right">₦{formatNaira(product.price * quantity)}</TableCell>
+                                        <TableCell className="text-right">{formatNaira(product.price)}</TableCell>
+                                        <TableCell className="text-right">{formatNaira(product.price * quantity)}</TableCell>
                                         <TableCell className="text-right">
                                             <Button
                                                 size="sm"
@@ -384,7 +389,7 @@ export default function SalesPage() {
                         <div className="text-sm text-muted-foreground">
                             Items: {cartItems.length} • Qty: {totals.totalQuantity}
                         </div>
-                        <div className="text-lg font-semibold">₦{formatNaira(totals.expectedTotal)}</div>
+                        <div className="text-lg font-semibold">{formatNaira(totals.expectedTotal)}</div>
                     </div>
 
                     <div className="flex items-center justify-end gap-3">
@@ -413,12 +418,17 @@ export default function SalesPage() {
                                             const matches = result?.validation?.matches
                                             if (matches === false) {
                                                 toast.warning(
-                                                    `Backend total (₦${formatNaira(result.validation.serverTotal)}) differs from UI total (₦${formatNaira(totals.expectedTotal)}).`
+                                                    `Backend total (${formatNaira(result.validation.serverTotal)}) differs from UI total (${formatNaira(totals.expectedTotal)}).`
                                                 )
                                             }
 
                                             clearCart()
                                             setSearchQuery("")
+
+                                            const txId = result?.transaction?.id
+                                            if (txId) {
+                                                router.push(`/sales/history/${txId}`)
+                                            }
                                         },
                                         onError: (err) => toast.error(getErrorMessage(err)),
                                     }

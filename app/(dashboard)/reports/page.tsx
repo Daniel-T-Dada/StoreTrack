@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useMe } from "@/hooks/useMe"
+import { formatNaira } from "@/lib/utils"
 import {
     useLowStock,
     useProfit,
@@ -11,12 +12,6 @@ import {
     useProfitByStaff,
     useTotalSales,
 } from "@/hooks/useReports"
-
-const formatMoney = (value: unknown) => {
-    const numberValue = typeof value === "number" ? value : Number(value)
-    if (!Number.isFinite(numberValue)) return "0"
-    return numberValue.toLocaleString(undefined, { maximumFractionDigits: 2 })
-}
 
 export default function ReportsPage() {
     const { data: me } = useMe()
@@ -63,11 +58,11 @@ export default function ReportsPage() {
                                 </div>
                                 <div className="flex items-center justify-between gap-4">
                                     <span className="text-muted-foreground">Total Sales</span>
-                                    <span className="font-medium">₦{formatMoney(totalSales.data?.totalSales)}</span>
+                                    <span className="font-medium">{formatNaira(totalSales.data?.totalSales)}</span>
                                 </div>
                                 <div className="flex items-center justify-between gap-4">
                                     <span className="text-muted-foreground">Revenue</span>
-                                    <span className="font-medium">₦{formatMoney(totalSales.data?.totalRevenue)}</span>
+                                    <span className="font-medium">{formatNaira(totalSales.data?.totalRevenue)}</span>
                                 </div>
                             </div>
                         )}
@@ -85,15 +80,15 @@ export default function ReportsPage() {
                             <div className="text-sm">
                                 <div className="flex items-center justify-between gap-4">
                                     <span className="text-muted-foreground">Revenue</span>
-                                    <span className="font-medium">₦{formatMoney(profit.data?.revenue)}</span>
+                                    <span className="font-medium">{formatNaira(profit.data?.revenue)}</span>
                                 </div>
                                 <div className="flex items-center justify-between gap-4">
                                     <span className="text-muted-foreground">Cost</span>
-                                    <span className="font-medium">₦{formatMoney(profit.data?.cost)}</span>
+                                    <span className="font-medium">{formatNaira(profit.data?.cost)}</span>
                                 </div>
                                 <div className="flex items-center justify-between gap-4">
                                     <span className="text-muted-foreground">Profit</span>
-                                    <span className="font-medium">₦{formatMoney(profit.data?.profit)}</span>
+                                    <span className="font-medium">{formatNaira(profit.data?.profit)}</span>
                                 </div>
                             </div>
                         )}
@@ -126,8 +121,8 @@ export default function ReportsPage() {
                                     profitByProduct.data.map((row) => (
                                         <TableRow key={row.productId}>
                                             <TableCell className="font-medium">{row.productName}</TableCell>
-                                            <TableCell className="text-right">₦{formatMoney(row.revenue)}</TableCell>
-                                            <TableCell className="text-right">₦{formatMoney(row.profit)}</TableCell>
+                                            <TableCell className="text-right">{formatNaira(row.revenue)}</TableCell>
+                                            <TableCell className="text-right">{formatNaira(row.profit)}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
@@ -170,8 +165,8 @@ export default function ReportsPage() {
                                         <TableRow key={row.staffId}>
                                             <TableCell className="font-medium">{row.staffName}</TableCell>
                                             <TableCell className="text-right">{row.totalItemsSold}</TableCell>
-                                            <TableCell className="text-right">₦{formatMoney(row.totalSalesAmount)}</TableCell>
-                                            <TableCell className="text-right">₦{formatMoney(row.totalProfit)}</TableCell>
+                                            <TableCell className="text-right">{formatNaira(row.totalSalesAmount)}</TableCell>
+                                            <TableCell className="text-right">{formatNaira(row.totalProfit)}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (

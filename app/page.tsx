@@ -9,12 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
-
-
-const formatMoney = (value: unknown) => {
-  const num = typeof value === "number" ? value : Number(value)
-  return Number.isFinite(num) ? num.toFixed(2) : "0.00"
-}
+import { formatNaira } from "@/lib/utils"
 
 const Home = () => {
   const router = useRouter()
@@ -85,13 +80,13 @@ function OwnerDashboard({ meLoading }: { meLoading: boolean }) {
         <Card>
           <CardHeader><CardTitle>Total Sales</CardTitle></CardHeader>
           <CardContent className="text-2xl font-semibold">
-            {isLoading ? <Skeleton className="h-8 w-24" /> : <>${formatMoney(totalSalesData?.totalSales)}</>}
+            {isLoading ? <Skeleton className="h-8 w-24" /> : <>{formatNaira(totalSalesData?.totalSales)}</>}
           </CardContent>
         </Card>
         <Card>
           <CardHeader><CardTitle>Total Revenue</CardTitle></CardHeader>
           <CardContent className="text-2xl font-semibold">
-            {isLoading ? <Skeleton className="h-8 w-24" /> : <>${formatMoney(totalSalesData?.totalRevenue)}</>}
+            {isLoading ? <Skeleton className="h-8 w-24" /> : <>{formatNaira(totalSalesData?.totalRevenue)}</>}
           </CardContent>
         </Card>
         <Card>
@@ -103,7 +98,7 @@ function OwnerDashboard({ meLoading }: { meLoading: boolean }) {
         <Card>
           <CardHeader><CardTitle>Total Profit</CardTitle></CardHeader>
           <CardContent className="text-2xl font-semibold">
-            {isLoading ? <Skeleton className="h-8 w-24" /> : <>${formatMoney(profitData?.profit)}</>}
+            {isLoading ? <Skeleton className="h-8 w-24" /> : <>{formatNaira(profitData?.profit)}</>}
           </CardContent>
         </Card>
       </div>
@@ -134,7 +129,7 @@ function OwnerDashboard({ meLoading }: { meLoading: boolean }) {
                   salesByStaffData.map((staff, idx) => (
                     <TableRow key={`${staff.staffId ?? staff.staffName ?? "staff"}-${idx}`}>
                       <TableCell>{staff.staffName}</TableCell>
-                      <TableCell className="text-right">${formatMoney(staff.totalSales)}</TableCell>
+                      <TableCell className="text-right">{formatNaira(staff.totalSales)}</TableCell>
                       <TableCell className="text-right">{staff.totalQuantity ?? 0}</TableCell>
                     </TableRow>
                   ))
@@ -210,19 +205,11 @@ function OwnerDashboard({ meLoading }: { meLoading: boolean }) {
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(v) => {
-                    const n = Number(v)
-                    if (!Number.isFinite(n)) return "0"
-                    return n.toLocaleString()
-                  }}
+                  tickFormatter={(v: number | string) =>
+                    formatNaira(v, { withSymbol: false, maximumFractionDigits: 0 })
+                  }
                 />
-                <Tooltip
-                  formatter={(value) => {
-                    const n = Number(value)
-                    if (!Number.isFinite(n)) return value
-                    return n.toLocaleString()
-                  }}
-                />
+                <Tooltip formatter={(value: number | string) => formatNaira(value)} />
                 <Bar dataKey="totalSales" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

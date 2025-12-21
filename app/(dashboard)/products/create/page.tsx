@@ -54,14 +54,37 @@ export default function NewProductPage() {
                                 return
                             }
 
+                            const price = Number(data.price)
+                            const costPrice = Number(data.costPrice)
+                            const quantity = data.quantity.trim() === "" ? 0 : Number(data.quantity)
+                            const lowStockThreshold =
+                                data.lowStockThreshold.trim() === "" ? 0 : Number(data.lowStockThreshold)
+
+                            if (!Number.isFinite(price) || price < 0) {
+                                toast.error("Selling price must be a valid number")
+                                return
+                            }
+                            if (!Number.isFinite(costPrice) || costPrice < 0) {
+                                toast.error("Cost price must be a valid number")
+                                return
+                            }
+                            if (!Number.isFinite(quantity) || quantity < 0) {
+                                toast.error("Quantity must be a valid number")
+                                return
+                            }
+                            if (!Number.isFinite(lowStockThreshold) || lowStockThreshold < 0) {
+                                toast.error("Low stock threshold must be a valid number")
+                                return
+                            }
+
                             const payload = {
                                 name: data.name,
                                 sku: data.sku.trim() ? data.sku.trim() : undefined,
                                 barcode: data.barcode.trim() ? data.barcode.trim() : undefined,
-                                price: Number(data.price) || 0,
-                                costPrice: Number(data.costPrice) || 0,
-                                quantity: Number(data.quantity) || 0,
-                                lowStockThreshold: Number(data.lowStockThreshold) || 0,
+                                price,
+                                costPrice,
+                                quantity,
+                                lowStockThreshold,
                             }
 
                             createProduct.mutate(payload, {

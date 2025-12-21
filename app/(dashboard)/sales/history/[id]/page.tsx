@@ -8,12 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
-const formatNaira = (value: unknown) => {
-    const numberValue = typeof value === "number" ? value : Number(value)
-    if (!Number.isFinite(numberValue)) return "0"
-    return numberValue.toLocaleString(undefined, { maximumFractionDigits: 2 })
-}
+import { formatNaira } from "@/lib/utils"
 
 export default function TransactionDetailsPage() {
     const params = useParams()
@@ -65,7 +60,7 @@ export default function TransactionDetailsPage() {
                             </div>
                             <div>
                                 <div className="text-sm text-muted-foreground">Total</div>
-                                <div className="text-lg font-semibold">₦{formatNaira(data.transaction.total)}</div>
+                                <div className="text-lg font-semibold">{formatNaira(data.transaction.total)}</div>
                             </div>
                         </div>
                     ) : (
@@ -109,8 +104,8 @@ export default function TransactionDetailsPage() {
                                             ) : null}
                                         </TableCell>
                                         <TableCell className="text-right">{item.quantity}</TableCell>
-                                        <TableCell className="text-right">₦{formatNaira(item.unitPrice)}</TableCell>
-                                        <TableCell className="text-right">₦{formatNaira(item.total)}</TableCell>
+                                        <TableCell className="text-right">{formatNaira(item.unitPrice)}</TableCell>
+                                        <TableCell className="text-right">{formatNaira(item.total)}</TableCell>
                                     </TableRow>
                                 ))}
 
@@ -118,7 +113,7 @@ export default function TransactionDetailsPage() {
                                     <TableCell className="text-right font-medium">Totals</TableCell>
                                     <TableCell className="text-right font-medium">{data.transaction.totalQuantity}</TableCell>
                                     <TableCell />
-                                    <TableCell className="text-right font-medium">₦{formatNaira(data.transaction.total)}</TableCell>
+                                    <TableCell className="text-right font-medium">{formatNaira(data.transaction.total)}</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>

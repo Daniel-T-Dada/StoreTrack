@@ -94,7 +94,7 @@ const AppSidebar = () => {
                                             (href !== "/" && !!pathname?.startsWith(href))
                                         }
                                     >
-                                        <Link href={href}>
+                                        <Link href={href} >
                                             <Icon />
                                             <span>{name}</span>
                                         </Link>

@@ -69,8 +69,20 @@ export function ProductForm({ defaultValues, onSubmit, loading }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name || !form.price) {
-      toast.error("Name and price are required")
+    if (!form.name.trim()) {
+      toast.error("Product name is required")
+      return
+    }
+
+    if (form.price.trim() === "" || form.costPrice.trim() === "") {
+      toast.error("Selling price and cost price are required")
+      return
+    }
+
+    const price = Number(form.price)
+    const costPrice = Number(form.costPrice)
+    if (!Number.isFinite(price) || price < 0 || !Number.isFinite(costPrice) || costPrice < 0) {
+      toast.error("Selling price and cost price must be valid numbers")
       return
     }
     onSubmit(form)
