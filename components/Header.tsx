@@ -5,6 +5,7 @@ import { useMe } from "@/hooks/useMe"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useMemo } from "react"
 import Link from "next/link"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function Header() {
     const { data: me, isLoading: meLoading } = useMe()
@@ -24,12 +25,21 @@ export function Header() {
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                     <SidebarTrigger className="shrink-0" />
                     <div className="min-w-0 flex-1">
-                        <h1 className="text-lg font-bold tracking-tight truncate">
-                            {meLoading ? "Dashboard" : `Welcome, ${me?.name ?? ""}`}
-                        </h1>
-                        <p className="hidden text-xs text-muted-foreground truncate sm:block">
-                            {meLoading ? "Loading your store data…" : `Role: ${me?.role ?? ""}`}
-                        </p>
+                        {meLoading ? (
+                            <div className="space-y-2">
+                                <Skeleton className="h-5 w-48" />
+                                <Skeleton className="hidden h-3 w-32 sm:block" />
+                            </div>
+                        ) : (
+                            <>
+                                <h1 className="text-lg font-bold tracking-tight truncate">
+                                    {`Welcome, ${me?.name ?? ""}`}
+                                </h1>
+                                <p className="hidden text-xs text-muted-foreground truncate sm:block">
+                                    {`Role: ${me?.role ?? ""}`}
+                                </p>
+                            </>
+                        )}
                     </div>
                 </div>
 

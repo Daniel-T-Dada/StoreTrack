@@ -1,11 +1,10 @@
 "use client"
 
 import { useProductSearch } from "@/hooks/useProducts"
-import { useStaff } from "@/hooks/useStaff"
 import { useCheckout } from "@/hooks/useTransactions"
 import { toast } from "sonner"
 import { useMe } from "@/hooks/useMe"
-import type { ProductLookupResult, Staff } from "@/types/api"
+import type { ProductLookupResult } from "@/types/api"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,13 +15,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useMemo, useState } from "react"
 import type { AxiosError } from "axios"
 import { useRouter } from "next/navigation"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { api } from "@/lib/api"
 import { formatNaira } from "@/lib/utils"
 
@@ -35,13 +27,6 @@ export default function SalesPage() {
     const checkout = useCheckout()
     const router = useRouter()
     const { data: me, isLoading: meLoading } = useMe() // 🔑 get current user
-
-    const isStaffUser = me?.userType === "staff" || me?.role === "staff"
-    const staffQueryEnabled = !!me && !isStaffUser
-    const { data: staff = [], isLoading: staffLoading } = useStaff({ enabled: staffQueryEnabled })
-    const staffOptions = staffQueryEnabled ? (staff as Staff[]) : []
-
-    const [staffId, setStaffId] = useState<string>("")
     const [searchQuery, setSearchQuery] = useState<string>("")
     const [lookupValue, setLookupValue] = useState<string>("")
 
@@ -56,7 +41,7 @@ export default function SalesPage() {
         return { totalQuantity, expectedTotal }
     }, [cartItems])
 
-    const showSkeleton = meLoading || (staffQueryEnabled && staffLoading)
+    const showSkeleton = meLoading
 
     const getErrorMessage = (err: unknown) => {
         type ErrorPayload = {
@@ -152,7 +137,7 @@ export default function SalesPage() {
         }
     }
 
-    const canCheckout = cartItems.length > 0 && (!staffQueryEnabled || !!staffId)
+    const canCheckout = cartItems.length > 0
 
     return (
         <div className="space-y-6">
@@ -207,24 +192,6 @@ export default function SalesPage() {
                                         Numeric input is treated as barcode; otherwise SKU.
                                     </p>
                                 </div>
-
-                                {staffQueryEnabled ? (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="checkout-staff">Staff</Label>
-                                        <Select value={staffId} onValueChange={setStaffId}>
-                                            <SelectTrigger id="checkout-staff" className="w-full">
-                                                <SelectValue placeholder="Select staff" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {staffOptions.map((s) => (
-                                                    <SelectItem key={s._id} value={s._id}>
-                                                        {s.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                ) : null}
                             </div>
                         )}
                     </CardContent>
@@ -396,7 +363,7 @@ export default function SalesPage() {
                         <Button
                             onClick={() => {
                                 if (!canCheckout) {
-                                    toast.error(staffQueryEnabled ? "Please select a staff member" : "Add items to cart")
+                                    toast.error("Add items to cart")
                                     return
                                 }
 
@@ -406,7 +373,6 @@ export default function SalesPage() {
                                             product: i.product._id,
                                             quantity: i.quantity,
                                         })),
-                                        staff: staffQueryEnabled ? staffId : undefined,
                                         client: {
                                             expectedTotal: totals.expectedTotal,
                                         },

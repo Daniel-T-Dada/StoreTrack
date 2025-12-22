@@ -21,6 +21,7 @@ import { useMe } from "@/hooks/useMe"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useTheme } from "next-themes"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -32,7 +33,7 @@ const AppSidebar = () => {
     const pathname = usePathname()
     const router = useRouter()
     const queryClient = useQueryClient()
-    const { data: me } = useMe()
+    const { data: me, isLoading: meLoading } = useMe()
     const { setTheme } = useTheme()
 
     const dashboardHref = me?.role && !["admin", "manager"].includes(me.role) ? "/staff-dashboard" : "/"
@@ -47,8 +48,9 @@ const AppSidebar = () => {
 
     const filteredNav = nav.filter((item) => {
         // Reports + Staff management are only for admin/manager.
-        if ((item.href === "/reports" || item.href === "/staff") && me?.role) {
-            return ["admin", "manager"].includes(me.role)
+        if (item.href === "/reports" || item.href === "/staff") {
+            // Default to hidden until we know the role to avoid a flash of privileged links.
+            return ["admin", "manager"].includes(me?.role ?? "")
         }
         return true
     })
@@ -84,23 +86,31 @@ const AppSidebar = () => {
                     <SidebarGroupLabel>Navigation</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {filteredNav.map(({ name, href, icon: Icon }) => (
-                                <SidebarMenuItem key={name}>
-                                    <SidebarMenuButton
-                                        asChild
-                                        tooltip={name}
-                                        isActive={
-                                            pathname === href ||
-                                            (href !== "/" && !!pathname?.startsWith(href))
-                                        }
-                                    >
-                                        <Link href={href} >
-                                            <Icon />
-                                            <span>{name}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                            {meLoading ? (
+                                <div className="space-y-2 px-2 py-1">
+                                    <Skeleton className="h-8 w-full" />
+                                    <Skeleton className="h-8 w-full" />
+                                    <Skeleton className="h-8 w-full" />
+                                </div>
+                            ) : (
+                                filteredNav.map(({ name, href, icon: Icon }) => (
+                                    <SidebarMenuItem key={name}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            tooltip={name}
+                                            isActive={
+                                                pathname === href ||
+                                                (href !== "/" && !!pathname?.startsWith(href))
+                                            }
+                                        >
+                                            <Link href={href}>
+                                                <Icon />
+                                                <span>{name}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))
+                            )}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

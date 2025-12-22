@@ -38,3 +38,38 @@ export const useStaffLogin = () => {
   })
 }
 
+// Combined register + send OTP
+export const useRegisterSendOtp = () => {
+  return useMutation<{ message?: string; requiresEmailVerification?: boolean }, unknown, {
+    name: string
+    email: string
+    password: string
+    store: string
+  }>({
+    mutationFn: async (data) => {
+      const res = await api.post("/auth/register-send-otp", data)
+      return res.data
+    },
+  })
+}
+
+// Verify OTP and log in (sets cookies and returns tokens/user)
+export const useVerifyOtpLogin = () => {
+  return useMutation<AuthResponse, unknown, { email: string; code: string }>({
+    mutationFn: async (data) => {
+      const res = await api.post("/auth/verify-otp-login", data)
+      return res.data
+    },
+  })
+}
+
+// Resend verification code
+export const useResendVerification = () => {
+  return useMutation<{ message?: string }, unknown, { email: string }>({
+    mutationFn: async (data) => {
+      const res = await api.post("/auth/resend-verification", data)
+      return res.data
+    },
+  })
+}
+

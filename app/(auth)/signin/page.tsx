@@ -7,6 +7,7 @@ import { AuthForm } from "@/components/auth/AuthForm"
 import { toast } from "sonner"
 import { z } from "zod"
 import type { AxiosError } from "axios"
+import Link from "next/link"
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -53,17 +54,47 @@ export default function SignInPage() {
       toast.success(`Welcome ${data.user.name}`)
       router.push("/")
     } catch (err: unknown) {
-      toast.error(getErrorMessage(err) || "Invalid credentials")
+      const status = getStatus(err)
+      const message = getErrorMessage(err)
+
+      if (status === 403 && message?.toLowerCase().includes("email not verified")) {
+        toast.message("Verify your email to continue", { description: "Enter the 6-digit code we sent to your email." })
+        router.push(`/verify-otp?email=${encodeURIComponent(values.email)}`)
+        return
+      }
+
+      toast.error(message || "Invalid credentials")
     }
   }
 
   return (
     <AuthForm
       title="Sign In"
+      description="Sign in to manage inventory, record sales, and view transactions."
       submitLabel="Login"
       initialValues={{ email: "", password: "" }}
       schema={loginSchema}
       onSubmit={handleLogin}
+      passwordAutoComplete="current-password"
+      fields={{
+        email: { placeholder: "you@company.com" },
+        password: { placeholder: "Enter your password" },
+      }}
+      footer={
+        <div className="space-y-2">
+          <div>
+            <Link className="underline underline-offset-4" href="/forgot-password">
+              Forgot your password?
+            </Link>
+          </div>
+          <div>
+            Don’t have an account?{" "}
+            <Link className="underline underline-offset-4" href="/signup">
+              Sign up
+            </Link>
+          </div>
+        </div>
+      }
     />
   )
 }

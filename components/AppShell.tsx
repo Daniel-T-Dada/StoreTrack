@@ -8,7 +8,7 @@ import { Header } from "@/components/Header"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardBreadcrumbs } from "@/components/DashboardBreadcrumbs"
 
-const AUTH_ROUTES = new Set(["/signin", "/signup", "/forgot-password", "/reset-password"])
+const AUTH_ROUTES = new Set(["/signin", "/signup", "/forgot-password", "/reset-password", "/verify-otp"])
 
 export function AppShell({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
