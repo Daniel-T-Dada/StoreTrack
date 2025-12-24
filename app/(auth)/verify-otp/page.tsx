@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useState } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
@@ -54,6 +54,42 @@ function VerifyOtpInner() {
             toast.error(message || "Verification failed")
         }
     }
+
+    // Auto-submit when user finishes entering the 6-digit code.
+    // Debounce slightly to avoid racing with fast typing or autofill.
+    const autoSubmitTimer = useRef<number | null>(null)
+    useEffect(() => {
+        // don't attempt auto-submit while an explicit submit is in progress
+        if (verifyOtp.isPending) return
+
+        if (code && code.length === 6) {
+            // ensure email exists before auto-submitting
+            if (!email) return
+
+            // small debounce to avoid accidental submits
+            if (autoSubmitTimer.current) {
+                window.clearTimeout(autoSubmitTimer.current)
+            }
+            autoSubmitTimer.current = window.setTimeout(async () => {
+                try {
+                    await verifyOtp.mutateAsync({ email, code })
+                    toast.success("Email verified. You’re now signed in.")
+                    router.push("/")
+                } catch (err: unknown) {
+                    const axiosErr = err as AxiosError<{ message?: string }>
+                    const message = axiosErr.response?.data?.message
+                    toast.error(message || "Verification failed")
+                }
+            }, 250)
+        }
+
+        return () => {
+            if (autoSubmitTimer.current) {
+                window.clearTimeout(autoSubmitTimer.current)
+                autoSubmitTimer.current = null
+            }
+        }
+    }, [code, email, verifyOtp, router])
 
     const handleResend = async () => {
         if (!email) {

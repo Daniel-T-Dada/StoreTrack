@@ -509,7 +509,30 @@ function SidebarMenuButton({
   tooltip?: string | React.ComponentProps<typeof TooltipContent>
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot : "button"
-  const { isMobile, state } = useSidebar()
+  const { isMobile, setOpenMobile, state } = useSidebar()
+
+  const { onClick, ...restProps } = props
+
+  const handleClick: React.MouseEventHandler<HTMLElement> = (event) => {
+    onClick?.(event as unknown as React.MouseEvent<HTMLButtonElement>)
+
+    // Mobile/tablet UX: when the sidebar is open (Sheet), any nav link click should close it.
+    // We only do this for `asChild` usage (typically a Next.js <Link />), so we don't break
+    // other sidebar buttons like dropdown triggers.
+    if (!isMobile || !asChild) return
+    if (event.defaultPrevented) return
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return
+    }
+
+    setOpenMobile(false)
+  }
 
   const button = (
     <Comp
@@ -518,7 +541,8 @@ function SidebarMenuButton({
       data-size={size}
       data-active={isActive}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-      {...props}
+      onClick={handleClick as unknown as React.MouseEventHandler<HTMLButtonElement>}
+      {...restProps}
     />
   )
 
